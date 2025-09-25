@@ -1,0 +1,14 @@
+item,unit,year_2000,year_2024,source
+"Bread (white, pan)",lb,0.930,1.970,BLS Average Price via FRED (APU0000702111); annual mean of monthly
+"Chicken breast, boneless",lb,,4.045,BLS Average Price via FRED (APU0000FF1101); annual mean of monthly
+"Rice, white, long-grain",lb,0.490,1.034,BLS Average Price via FRED (APU0000701312); annual mean of monthly
+"Coffee, ground",lb,3.450,6.322,BLS Average Price via FRED (APU0000717311); annual mean of monthly
+Potatoes,5 lb,0.380,0.982,BLS Average Price via FRED (APU0000712112); annual mean of monthly
+Bananas,lb,0.501,0.620,BLS Average Price via FRED (APU0000711211); annual mean of monthly
+Peanut butter,16 oz,1.893,,BLS Average Price via FRED (APU0000716141); annual mean of monthly
+"Eggs, large",dozen,0.913,3.171,BLS Average Price via FRED (APU0000708111); annual mean of monthly
+Milk (whole),gallon,,,BLS Average Price via FRED (APU0000709111); annual mean of monthly
+Ground beef (100% beef),lb,1.569,5.393,BLS Average Price via FRED (APU0000703112); annual mean of monthly
+Electricity (residential),cents/kWh,0.087,0.176,BLS Average Price via FRED (APU000072610); annual mean of monthly
+"Natural gas (residential), per therm",$/therm,0.803,1.428,BLS Average Price via FRED (APU000072620); annual mean of monthly
+"Gasoline, regular",gallon,1.510,3.449,BLS Average Price via FRED (APU000074714); annual mean of monthly

@@ -1,0 +1,10 @@
+item,unit,year_2000,year_2024,source
+Milk (whole),gallon,2.78,3.98,"BLS average price series via USInflationCalculator (milk), 2000 & 2024"
+Ground beef (100% beef),per lb,1.99,5.71,BLS APU0000703112 (ground beef) — 2024 avg; 2000 approximated from 2000 monthly range
+"Bread (white, pan)",per lb,,1.9,BLS APU0000702111 (bread) — 2024 approx.; 2000 left blank
+Gasoline (regular),per gallon,1.485,3.304,EIA monthly 2000 (averaged); EIA/FRED annual 2024 (GASREGA)
+Electricity (residential),cents per kWh,8.24,16.78,EIA (Average residential price) — national annual averages
+Big Mac (U.S.),each,2.24,5.69,The Economist Big Mac Index (via Yahoo Finance & Economist explainer)
+Median gross rent (U.S.),per month,602.0,1487.0,U.S. Census (Census 2000; ACS 2024 1‑year)
+Public 4‑year college (in‑state tuition & fees),per academic year,4839.0,9800.0,NCES (Digest tables & Fast Facts)
+Employer health insurance premium (single coverage),per year (total premium),2471.0,8951.0,KFF Employer Health Benefits Survey (historical & 2024)
