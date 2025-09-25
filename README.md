@@ -92,27 +92,21 @@ python personal_inflation_plus.py --csv filled.csv --out breakdown.csv
 
 ## Category weights (examples)
 
-Change this code in the `personal_inflation_fred_plus.py` Python script:
+Change this in `personal_inflation_fred_plus.py` to compile your own personal weights:
 
 ```py
 DEFAULT_WEIGHTS = {
-    "food_at_home": 0.45,         # emphasize groceries
-    "utilities_electric": 0.20,   # electric
-    "utilities_gas": 0.15,        # utility gas
-    "transport_fuel": 0.20,       # gasoline
-    # NOTE: if you add shelter/healthcare later, the script will normalize again over present categories
+  "food_at_home": 0.45,
+  "utilities_electric": 0.20,
+  "utilities_gas": 0.15,
+  "transport_fuel": 0.20
 }
 ```
 
-`my_weights.json` (for the FRED script's categories):
+`my_weights.json` (for the FRED script):
 
 ```json
-{
-  "food_at_home": 0.45,
-  "utilities_electric": 0.2,
-  "utilities_gas": 0.15,
-  "transport_fuel": 0.2
-}
+{ "food_at_home": 0.45, "utilities_electric": 0.2, "utilities_gas": 0.15, "transport_fuel": 0.2 }
 ```
 
 `my_weights.csv.json` (for the broader CSV calculator; categories are assigned by keyword, see code):
@@ -132,7 +126,53 @@ DEFAULT_WEIGHTS = {
 }
 ```
 
-> Weights automatically **normalize** to the categories actually present in your data, and items within a category share equal weight.
+> Weights automatically **normalize** to the categories actually present in your data; items within a category share equal weight.
+
+---
+
+## Data snapshot (2000 → 2024, staples basket)
+
+This is the exact run behind `fred_basket_2000_2024.csv` and the saved charts:
+
+- **Items used:** 10 (of 13 with data)
+- **Unweighted inflation (arith):** **+128.66%**
+- **Unweighted inflation (geometric):** **+119.14%**
+- **Implied purchasing power (geometric):** **\$0.456 per \$1** (**−54.37%**)
+
+| Item                                 | Unit      |  2000 |  2024 | % change |
+| ------------------------------------ | --------- | ----: | ----: | -------: |
+| Eggs, large                          | dozen     | 0.913 | 3.171 |  +247.2% |
+| Ground beef (100% beef)              | lb        | 1.569 | 5.393 |  +243.6% |
+| Potatoes                             | 5 lb      | 0.380 | 0.982 |  +158.5% |
+| Gasoline, regular                    | gallon    | 1.510 | 3.449 |  +128.4% |
+| Bread (white, pan)                   | lb        | 0.930 | 1.970 |  +111.8% |
+| Rice, white, long-grain              | lb        | 0.490 | 1.034 |  +110.9% |
+| Electricity (residential)            | cents/kWh | 0.087 | 0.176 |  +101.3% |
+| Coffee, ground                       | lb        | 3.450 | 6.322 |   +83.3% |
+| Natural gas (residential), per therm | \$/therm  | 0.803 | 1.428 |   +77.7% |
+| Bananas                              | lb        | 0.501 | 0.620 |   +23.8% |
+
+See the committed images for visuals:
+
+- `levels_2000_vs_2024.png` — price levels per item (2000 vs 2024)
+- `pct_changes_2000_vs_2024.png` — sorted % change per item
+
+> **Note:** Chicken, milk, and peanut butter were excluded from the "used" set due to missing one of the endpoints in this particular run; once filled, they'll be included automatically.
+
+---
+
+## What this means
+
+- On this staples basket, the dollar's **buying power is \~halved** since 2000 (≈ **−54%**).
+- The **worst movers** are protein staples (eggs, ground beef) and **energy** (gasoline).
+- Utilities rose strongly, groceries mixed (bananas barely moved; bread/rice surged).
+- If you add **shelter** (rent) and **healthcare** with realistic weights, you should expect a **larger** purchasing-power loss than shown here; conversely, adding consumer tech often pulls it **down**.
+
+**Caveats:**
+
+- BLS "Average Price" series are **sticker levels** (annual mean of monthly observations). For change-over-time, BLS recommends CPI indexes; Average Price is **not quality-adjusted** and specs can drift.
+- These are **U.S. city averages**; local reality (especially rent) can be far worse or better.
+- Endpoints matter: 2000→2024 is a snapshot; 2000→2025 may differ.
 
 ---
 
@@ -142,35 +182,31 @@ DEFAULT_WEIGHTS = {
 - `unit` (string) — free text ("lb", "gallon", "cents/kWh", etc.)
 - `year_2000` (float) — price level in base year
 - `year_2024` (float) — price level in compare year
-- `source` (string) — where you got it (FRED series ID, ACS table, KFF, etc.)
-
-**Tip:** For FRED/BLS Average Price series, we use the **annual mean of monthly observations** for each year.
+- `source` (string) — e.g., `BLS Average Price via FRED (APU0000702111); annual mean of monthly`
 
 ---
 
 ## How inflation is computed
 
-- **Unweighted arithmetic**: mean of `(price_b / price_a) - 1` across items.
-- **Unweighted geometric**: `exp(mean(log(price_b / price_a))) - 1` (more robust to outliers); used for the purchasing-power line by default.
-- **Weighted "necessities"**: Laspeyres-style — normalize your category weights across the categories present; within a category, items share equal weight; then sum category contributions.
+- **Unweighted (arithmetic):** mean of `(price_b / price_a) − 1` across items
+- **Unweighted (geometric):** `exp(mean(log(price_b / price_a))) − 1` (used for purchasing power)
+- **Weighted "necessities":** Laspeyres-style — normalize category weights over categories present; equal weight **within** category; sum contributions
 
-**Implied purchasing power:**
-If cumulative inflation = `p` (e.g., 1.19 for +119%), then **\$1** in base year ≈ **\$1 / (1 + p)** in the compare year.
+**Implied purchasing power:** if cumulative inflation is `p` (e.g., 1.19 for +119%), then **\$1** in the base year ≈ **\$1 / (1 + p)** in the compare year.
 
 ---
 
-## Reliability & caveats
+## Reliability & caveats (TL;DR)
 
-- **FRED is a mirror of official sources** (BLS/EIA/Census). You get the same values as the origin; revisions propagate.
-- **BLS "Average Price" series** (APU...) are great for **sticker levels**, but BLS recommends **CPI indexes** for change-over-time due to item replacement/quality adjustment. We mitigate noise by using **annual averages**, but these series are **not quality-adjusted**.
-- **National averages hide regional variance**, especially for **shelter**. If you care about your city, swap in local rent data (ACS/ZORI) and weight shelter heavily.
-- **Basket choice and weights dominate** the result. A shelter-heavy, healthcare-included basket will show worse inflation than headline CPI; adding cheap tech drags it down.
+- **FRED mirrors official sources** (BLS/EIA/Census); values and revisions match origin.
+- **Average Price** is great for **levels**; for **change**, CPI indexes are methodologically preferred.
+- **Basket choice & weights dominate** the result. If you care about rent/healthcare, include and weight them accordingly.
 
 ---
 
 ## Reproducibility
 
-- Pin dependencies if you want identical runs:
+Pin if you want identical runs:
 
 ```
 requests==2.*
@@ -180,12 +216,79 @@ matplotlib==3.*
 xlsxwriter==3.*
 ```
 
-- Keep **FRED API key** in your shell (`export FRED_API_KEY=...`), **never** in the repo.
+Keep `FRED_API_KEY` in your shell (not in the repo).
 
 ---
 
-## Roadmap (nice-to-haves)
+## Roadmap
 
-- Add **rent tiers** (ACS/ZORI) and **healthcare OOP** (KFF/FAIR Health) helpers.
-- Add **auto insurance** (III/NAIC), **AAA maintenance**, **childcare** (CCAoA).
-- CLI flag for multi-year runs (2000→2010→2015→2020→2024) and a time-series chart of your "True CPI".
+- Add helpers for **rent** (ACS/ZORI), **healthcare OOP** (KFF/FAIR Health), **auto insurance/maintenance** (III/AAA), **childcare** (CCAoA).
+- Multi-year runs (2000→2010→2015→2020→2024) and a time-series chart of your custom index.
+
+Here you go—drop these sections into your README.
+
+## Sources
+
+- **FRED (Federal Reserve Bank of St. Louis)** — API mirror for official series (BLS/EIA/Census).
+
+  - [FRED main](https://fred.stlouisfed.org/) - [API docs](https://fred.stlouisfed.org/docs/api/fred/)
+
+- **BLS Average Price series (APU...)** — sticker-price levels (e.g., \$/lb, \$/dozen).
+
+  - [BLS Average Price Database](https://www.bls.gov/cpi/tables/average-price-data.htm)
+
+- **BLS CPI indexes** — official inflation indexes (quality-adjusted, chain-weighted).
+
+  - [BLS CPI Home](https://www.bls.gov/cpi/)
+
+- **EIA** — energy price series (electricity, natural gas).
+
+  - [EIA Electricity](https://www.eia.gov/electricity/) - [EIA Natural Gas](https://www.eia.gov/naturalgas/)
+
+- **Census/ACS** — rent, housing metrics (if you extend to shelter).
+
+  - [American Community Survey](https://www.census.gov/programs-surveys/acs)
+
+- **KFF Employer Health Benefits Survey** — premiums, deductibles, OOP (if you extend to healthcare).
+
+  - [KFF EHBS](https://www.kff.org/ehbs/)
+
+- **AAA "Your Driving Costs"** — maintenance per-mile, typical ownership costs.
+
+  - [AAA YDC](https://newsroom.aaa.com/tag/your-driving-costs/)
+
+- **III / NAIC** — auto insurance premiums.
+
+  - [III Insurance Facts](https://www.iii.org/fact-statistic/facts-statistics-auto-insurance)
+
+- **Zillow / ZORI** — rent indices (metro-level).
+
+  - [ZORI](https://www.zillow.com/research/data/)
+
+- **US Inflation Calculator** — annual averages compiled from BLS monthly data (handy cross-check).
+
+  - [US Inflation Calculator](https://www.usinflationcalculator.com/)
+
+- **Alternative/independent dashboards** _(interpret with care)_:
+
+  - [Truflation](https://truflation.com/)
+  - [Shadow Stats](https://www.shadowstats.com/) _(methodology diverges sharply from BLS; see caveats below)_
+
+- **Recent commentary** _(ephemeral)_:
+
+  - PYMNTS: _"Inflation's Impact Can't Be Seen Through CPI, Says Ex-Comptroller"_ (2025) — [link](https://www.pymnts.com/economy/2025/inflations-impact-cant-be-seen-through-cpi-says-ex-comptroller/)
+
+## Conclusion
+
+On the staples basket we pulled (food-at-home + energy/utilities), the **geometric inflation 2000→2024 is \~+119%**, implying the **dollar buys about \$0.456** of the same stuff—**roughly half** the purchasing power. If you expand the basket to include **shelter** (rent or entry PITI) and **healthcare** with realistic weights, your personal loss typically rises into the **high-50% range**. That gap versus **official CPI** (≈+88% since 2000, or ≈\$0.53 per 2000 dollar) mostly comes from **what you buy** and **how you weight it**—necessities and local housing pressures inflate faster than the national, quality-adjusted CPI bundle.
+
+Do your own research, but keep the caveats in mind:
+
+- **Method matters.** BLS **CPI indexes** are designed for change-over-time (quality adjustment, item substitution). **Average Price** series are great for sticker levels; using annual means is reasonable but **not quality-adjusted**.
+- **Place matters.** National averages hide local variance. If your city's rent is \~2.6x (or more), a **shelter-heavy** personal index will show much worse inflation than CPI.
+- **Composition matters.** Heavier weights on shelter/health premiums/childcare/auto insurance push inflation up; adding deflationary tech pulls it down.
+- **Endpoints swing results.** 2000→2024 vs 2000→2025 can shift several points (eggs/energy are volatile).
+
+About **Shadow Stats** and similar alternatives: they publish higher inflation estimates based on **non-BLS methodologies** (e.g., pre-1990s CPI rules or proprietary adjustments). They're useful as _dissenting benchmarks_, but they're **not** directly comparable to CPI and are **not** used by official statistical agencies. If you cite them, be explicit about the method differences. Tools like **Truflation** also diverge methodologically (on-chain/real-time data, different baskets); consider them **complements**, not substitutes.
+
+Bottom line: this toolkit makes the **assumptions explicit**—your basket, your weights, reproducible data pulls—so you can show _why_ your personal inflation can be worse than headline CPI and by **how much**.
